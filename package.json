@@ -1,0 +1,19 @@
+{
+  "name": "tgbottemplate",
+  "module": "index.ts",
+  "type": "module",
+  "scripts": {
+    "start": "bun run ./index.ts"
+  },
+  "private": true,
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "grammy": "^1.35.1"
+  }
+}
+
