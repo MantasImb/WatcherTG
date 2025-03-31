@@ -3,8 +3,8 @@ require("dotenv").config();
 const sepoliaSocket = process.env.sepoliaurl;
 // below are commented out because the project is sunset and is only used as a showcase
 // const mainnetSocket = process.env.etherurl
-// const binanceSocket = "https://bsc-dataseed.binance.org"
-// const arbitrumSocket = "https://rpc.ankr.com/arbitrum"
+// const binanceSocket = process.env.binanceurl
+// const arbitrumSocket = process.env.arbitrumurl
 // const optimismSocket = process.env.optimismurl
 const dbUrl = process.env.dburl;
 const origin = process.env.origin;
