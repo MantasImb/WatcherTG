@@ -1,6 +1,6 @@
 import ethers from "ethers";
 import { fetchHistory, getLatestTimestamp } from "./scanners";
-import { io } from "./ws";
+import { io, establishWSConnection } from "./ws";
 
 import { sepoliaSocket } from "./config/urls";
 
@@ -11,7 +11,7 @@ import { devWallets } from "./config/devWallets";
 
 import { type EtherscanTransaction } from "./scanners";
 
-type Wallet = {
+export type Wallet = {
   address: string;
   balance?: ethers.BigNumberish;
 };
@@ -190,7 +190,7 @@ export function removeWallet(address: string, chain: number) {
   );
 }
 
-async function main() {
+export async function main() {
   try {
     sepoliaProvider = new ethers.providers.JsonRpcProvider(sepoliaSocket);
     // below are commented out because the project is sunset and is only used as a showcase
@@ -199,7 +199,7 @@ async function main() {
     // arbitrumProvider = new ethers.providers.JsonRpcProvider(arbitrumSocket)
     // optimismProvider = new ethers.providers.JsonRpcProvider(optimismSocket)
 
-    // await getAllWallets();
+    await establishWSConnection();
     await getBalances();
 
     // add a new block event listener for each chain
@@ -217,5 +217,3 @@ async function main() {
     main();
   }
 }
-
-main();
