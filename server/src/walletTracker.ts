@@ -1,6 +1,6 @@
 import ethers from "ethers";
 import { fetchHistory, getLatestTimestamp } from "./scanners";
-import { io, establishWSConnection } from "./ws";
+import { socket, establishWSConnection } from "./ws";
 
 import { sepoliaSocket } from "./config/urls";
 
@@ -32,7 +32,7 @@ export let wallets: Record<number, Wallet[]> = {
 export let sepoliaProvider: ethers.providers.JsonRpcProvider;
 
 // fetches all the balances on all the wallets on all the chains on the wallets object
-async function getBalances() {
+export async function getBalances() {
   for (const chain in wallets) {
     try {
       const provider = getProvider(chain);
@@ -149,7 +149,7 @@ async function handleNotifications(
       hash: extendedTransaction.hash,
     };
 
-    io.emit("transaction", notification);
+    socket.emit("NEW_TRANSACTION", notification);
   }
 }
 
@@ -168,7 +168,7 @@ function setToOrFromTransaction(
 }
 
 export async function addWallet(address: string, chain: number) {
-  if (wallets[chain] === undefined) {
+  if (!(chain in wallets)) {
     return Error("Chain not found");
   }
   // check if has balance
@@ -176,7 +176,7 @@ export async function addWallet(address: string, chain: number) {
   let balance = await provider.getBalance(address);
   if (!balance) return "Wallet hasn't been found";
 
-  wallets[chain].push({ address, balance });
+  wallets[chain]!.push({ address, balance });
   let latestTimetimestamp = await getLatestTimestamp(address, chain);
   return { latestTimetimestamp, balance };
 }

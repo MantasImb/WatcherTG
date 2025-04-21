@@ -7,10 +7,20 @@ const router = Router();
 // Wallet Routes
 router.post("/wallet", async (req, res) => {
   const { address, chain } = req.body;
+  if (!address || !chain) {
+    res.status(400).json({
+      status: "error",
+      message: "Address and chain are required",
+    });
+    return;
+  }
   const result = await addWallet(address, chain);
+  console.log("Wallet added", { address, chain });
 
   if (result instanceof Error) {
     res.status(400).json({ status: "error", message: result.message });
+  } else if (result === "Wallet hasn't been found") {
+    res.status(404).json({ status: "error", message: result });
   } else {
     res.status(200).json({ status: "success", data: result });
   }

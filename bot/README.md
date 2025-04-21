@@ -50,3 +50,5 @@ telegram-bot/
 
    - _Description_: Display all wallets currently being tracked, including their names.
    - _Usage_: `/list`
+
+# Tech stack

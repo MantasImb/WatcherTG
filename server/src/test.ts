@@ -27,7 +27,7 @@ export async function sendSepoliaEth() {
       gasLimit: 21000,
       gasPrice: ethers.utils.parseUnits("10", "gwei"),
     });
-    console.log(tx);
+    console.log("Executed test transaction", tx.from, tx.to);
     return tx;
   } catch (error) {
     console.error(error as Error);

@@ -1,19 +1,38 @@
 import { Bot } from "grammy";
+import { config } from "./src/config.ts";
+import { initializeNotifications } from "./src/serviceManager.ts";
+import { setupCommands } from "./src/commands.ts";
+import { logger } from "./src/utils/logger.ts";
 
-// Create an instance of the `Bot` class and pass your bot token to it.
-const bot = new Bot("7675300686:AAFkfLsuRQLtte8kXs4feAEflZVJ_IsC35E"); // <-- put your bot token between the ""
+async function startBot() {
+  try {
+    // Initialize the bot
+    const bot = new Bot(config.BOT_TOKEN);
 
-// You can now register listeners on your bot object `bot`.
-// grammY will call the listeners when users send messages to your bot.
+    // Set up command handlers
+    setupCommands(bot);
+    logger.info("Bot commands initialized");
 
-// Handle the /start command.
-bot.command("start", (ctx) => ctx.reply("Welcome! Up and running."));
-// Handle other messages.
-bot.on("message", (ctx) => ctx.reply("Got another message!"));
+    // Set up notification handling
+    initializeNotifications(bot);
+    logger.info("Notification system initialized");
 
-// Now that you specified how to handle messages, you can start your bot.
-// This will connect to the Telegram servers and wait for messages.
+    // Start the bot
+    await bot.start();
+    logger.info("Bot started successfully");
 
-// Start the bot.
-bot.start();
+    // Handle graceful shutdown
+    const stopBot = () => {
+      bot.stop();
+      process.exit();
+    };
 
+    process.once("SIGINT", stopBot);
+    process.once("SIGTERM", stopBot);
+  } catch (error) {
+    logger.error("Failed to start bot", { error });
+    process.exit(1);
+  }
+}
+
+startBot();

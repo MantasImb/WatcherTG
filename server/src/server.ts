@@ -5,11 +5,11 @@ dotenv.config();
 const PORT = process.env.PORT || 4000;
 const app = express();
 
-import { io } from "./ws";
+import { socket } from "./ws";
 import { createServer } from "http";
 
 const httpServer = createServer(app);
-io.attach(httpServer);
+socket.attach(httpServer);
 
 app.use(cors());
 app.use(express.urlencoded({ extended: false }));
