@@ -36,7 +36,9 @@ let notificationHandler: (transaction: TransactionData) => Promise<void> | void;
 const initSocket = (): void => {
   try {
     logger.info("Initializing WebSocket connection");
-    socket = io(config.TRACKING_SERVER_URL);
+    socket = io(config.TRACKING_SERVER_URL, {
+      reconnectionDelay: 15000,
+    });
 
     setupEventListeners();
   } catch (error) {
