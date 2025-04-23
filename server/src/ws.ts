@@ -40,7 +40,7 @@ export async function establishWSConnection() {
 
         getBalances();
 
-        console.log("Updated wallets:", wallets);
+        console.log("Updated wallets");
       });
 
       // Handle disconnection

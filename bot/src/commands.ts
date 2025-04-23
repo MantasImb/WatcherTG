@@ -4,6 +4,7 @@ import { createContextLogger } from "./utils/logger";
 import { db } from "./db";
 import { users, wallets } from "./db/schema";
 import { eq, and } from "drizzle-orm";
+import { getUser, getUserWallets } from "./db/functions.ts";
 
 const logger = createContextLogger("Commands");
 
@@ -27,7 +28,7 @@ Available commands:
       if (!ctx.from) {
         throw new Error("No user information available");
       }
-      const telegramId = ctx.from.id;
+      const telegramId = ctx.from.id.toString();
       const userId = await db.query.users.findFirst({
         where: eq(users.telegramId, telegramId),
       });
@@ -66,7 +67,7 @@ Example: /untrack MyWallet
       if (!ctx.from) {
         throw new Error("No user information available");
       }
-      const telegramId = ctx.from.id;
+      const telegramId = ctx.from.id.toString();
       const message = ctx.message!.text.trim();
       const parts = message.split(" ");
       logger.info("Adding tracked wallet", { telegramId, message });
@@ -138,46 +139,43 @@ Example: /untrack MyWallet
     }
   });
 
-  // // List tracked wallets command
-  // bot.command("list", async (ctx) => {
-  //   try {
-  //     const telegramId = ctx.from.id;
-  //
-  //     // Get user ID
-  //     const userResult = await db
-  //       .select()
-  //       .from(users)
-  //       .where(eq(users.telegramId, telegramId));
-  //
-  //     if (userResult.length === 0) {
-  //       return ctx.reply("You haven't tracked any wallets yet.");
-  //     }
-  //
-  //     const userId = userResult[0].id;
-  //
-  //     // Get tracked wallets
-  //     const trackedWallets = await db
-  //       .select()
-  //       .from(wallets)
-  //       .where(eq(wallets.userId, userId));
-  //
-  //     if (trackedWallets.length === 0) {
-  //       return ctx.reply("You haven't tracked any wallets yet.");
-  //     }
-  //
-  //     // Format response
-  //     let message = "🔍 <b>Your tracked wallets:</b>\n\n";
-  //
-  //     trackedWallets.forEach((wallet, index) => {
-  //       message += `${index + 1}. <b>${wallet.name}</b>: <code>${wallet.address}</code>\n`;
-  //     });
-  //
-  //     ctx.reply(message, { parse_mode: "HTML" });
-  //   } catch (error) {
-  //     logger.error("Error in list command", { error });
-  //     ctx.reply("Sorry, there was an error processing your request.");
-  //   }
-  // });
+  // List tracked wallets command
+  bot.command("list", async (ctx) => {
+    try {
+      if (!ctx.from) {
+        throw new Error("No user information available");
+      }
+      const telegramId = ctx.from.id;
+
+      // Get user ID
+      const userResult = await getUser(telegramId.toString());
+
+      if (!userResult) {
+        return ctx.reply("You haven't tracked any wallets yet.");
+      }
+
+      const userId = userResult.id;
+
+      // Get tracked wallets
+      const trackedWallets = await getUserWallets(userId);
+
+      if (trackedWallets.length === 0) {
+        return ctx.reply("You haven't tracked any wallets yet.");
+      }
+
+      // Format response
+      let message = "🔍 <b>Your tracked wallets:</b>\n\n";
+
+      trackedWallets.forEach((wallet, index) => {
+        message += `${index + 1}. <b>${wallet.name}</b>: <code>${wallet.address}</code>\n`;
+      });
+
+      ctx.reply(message, { parse_mode: "HTML" });
+    } catch (error) {
+      logger.error("Error in list command", { error });
+      ctx.reply("Sorry, there was an error processing your request.");
+    }
+  });
 
   // Add other commands...
 }

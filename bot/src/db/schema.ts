@@ -17,7 +17,7 @@ export const subscriptionEnum = pgEnum("subscription", ["free", "premium"]);
 export const users = pgTable("users", {
   // Core Fields
   id: serial("id").primaryKey(),
-  telegramId: integer("telegram_id").notNull().unique(),
+  telegramId: varchar("telegram_id").notNull().unique(),
 
   // Premium Status
   subscription: subscriptionEnum().default("free").notNull(),

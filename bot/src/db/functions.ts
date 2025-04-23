@@ -1,11 +1,9 @@
 import { db } from "."; // Import your database instance
 import { users, wallets } from "./schema"; // Import the users table schema
-import { logger } from "../utils/logger.ts";
 import { eq } from "drizzle-orm";
-import type { ethers } from "ethers";
 
 // --- USER ---
-export async function createUser(telegramId: number) {
+export async function createUser(telegramId: string) {
   const [user] = await db
     .insert(users)
     .values({ telegramId })
@@ -14,7 +12,7 @@ export async function createUser(telegramId: number) {
   return user;
 }
 
-export async function getUser(telegramId: number) {
+export async function getUser(telegramId: string) {
   const user = await db.query.users.findFirst({
     where: (users, { eq }) => eq(users.telegramId, telegramId),
   });
