@@ -1,6 +1,6 @@
 import { db } from "."; // Import your database instance
 import { users, wallets } from "./schema"; // Import the users table schema
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 
 // --- USER ---
 export async function createUser(telegramId: string) {
@@ -42,6 +42,17 @@ export async function getUserWallets(userId: number) {
   });
 
   return wallets;
+}
+
+// Gets a wallet by name and returns it
+export async function deleteWalletByName(name: string, telegramId: string) {
+  const user = await getUser(telegramId);
+  if (!user) throw new Error("User not found");
+  const wallet = await db
+    .delete(wallets)
+    .where(and(eq(wallets.name, name), eq(wallets.userId, user.id)))
+    .returning();
+  return wallet;
 }
 
 // Used for getting users that track a specific wallet

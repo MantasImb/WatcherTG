@@ -4,7 +4,7 @@ import { createContextLogger } from "./utils/logger";
 import { db } from "./db";
 import { users, wallets } from "./db/schema";
 import { eq, and } from "drizzle-orm";
-import { getUser, getUserWallets } from "./db/functions.ts";
+import { deleteWalletByName, getUser, getUserWallets } from "./db/functions.ts";
 
 const logger = createContextLogger("Commands");
 
@@ -135,6 +135,38 @@ Example: /untrack MyWallet
       }
     } catch (error) {
       logger.error("Error in track command", { error });
+      ctx.reply("Sorry, there was an error processing your request.");
+    }
+  });
+
+  // Untrack wallet command
+  bot.command("untrack", async (ctx) => {
+    try {
+      if (!ctx.from) {
+        throw new Error("No user information available");
+      }
+      const telegramId = ctx.from.id.toString();
+      const message = ctx.message!.text.trim();
+      const parts = message.split(" ");
+      logger.info("Untracking wallet", { telegramId, message });
+
+      if (parts.length != 2 || !parts[1]) {
+        return ctx.reply("Please follow this format: /untrack <name>");
+      }
+
+      const name = parts[1];
+
+      const [wallet] = await deleteWalletByName(name, telegramId);
+
+      if (!wallet) {
+        return ctx.reply(`Wallet of name "${name}" not found.`);
+      } else {
+        return ctx.reply(
+          `Wallet of name "${name}" and address "${wallet.address}" removed from tracking list.`,
+        );
+      }
+    } catch (error) {
+      logger.error("Error in untrack command", { error });
       ctx.reply("Sorry, there was an error processing your request.");
     }
   });
