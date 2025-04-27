@@ -55,6 +55,14 @@ export async function deleteWalletByName(name: string, telegramId: string) {
   return wallet;
 }
 
+// Returns bool depending if any wallets with an address exist
+export async function addressTracked(address: string) {
+  const result = await db.query.wallets.findFirst({
+    where: eq(wallets.address, address),
+  });
+  return !!result;
+}
+
 // Used for getting users that track a specific wallet
 // TODO: Implement this so that this function returns an array of user id's (also change functionality in serviceManager.ts)
 export async function getWalletEntries(address: string) {

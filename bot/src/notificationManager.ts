@@ -1,12 +1,10 @@
 import { eq } from "drizzle-orm";
 import { db } from "./db";
-import { users, wallets } from "./db/schema";
+import { users } from "./db/schema";
 import { webSocketClient, type TransactionData } from "./services/websocket";
 import { createContextLogger, ExtendedError } from "./utils/logger";
-import { createWallet, getWalletEntries } from "./db/functions";
+import { getWalletEntries } from "./db/functions";
 import type { Bot } from "grammy";
-import { fetch } from "bun";
-import { config } from "./config";
 
 const logger = createContextLogger("Notifications");
 
@@ -68,47 +66,3 @@ function createTransactionHandler(bot: Bot) {
     }
   };
 }
-
-export async function trackWallet(
-  userId: number,
-  address: string,
-  name: string,
-  chain: number,
-) {
-  try {
-    logger.info("Creating a new wallet", { userId, address, name, chain });
-    const result = await createWallet(userId, name, address, chain);
-    if (!result)
-      throw new ExtendedError("Failed creating new wallet in the db", {
-        userId,
-        address,
-        name,
-        chain,
-      });
-    logger.info("Sending new wallet to tracking server", {
-      userId,
-      address,
-      name,
-      chain,
-    });
-    const response = await fetch(`${config.TRACKING_SERVER_URL}/wallet`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ chain, address }),
-    });
-
-    if (response.status !== 200)
-      throw new ExtendedError(
-        "Failed sending a new added wallet to the tracking server",
-        { userId, name, address, chain, response },
-      );
-    return true;
-  } catch (error) {
-    logger.error(error instanceof Error ? error : "Error while adding wallet");
-  }
-}
-
-// Example of untracking a wallet
-export function untrackWallet(userId: number, address: string) {}

@@ -1,7 +1,7 @@
 import { Bot } from "grammy";
 import { config } from "./src/config.ts";
-import { initializeNotifications } from "./src/serviceManager.ts";
-import { setupCommands } from "./src/commands.ts";
+import { initializeNotifications } from "./src/notificationManager.ts";
+import { setupCommands } from "./src/commands";
 import { logger } from "./src/utils/logger.ts";
 
 async function startBot() {
